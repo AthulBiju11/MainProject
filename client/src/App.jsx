@@ -1,10 +1,11 @@
 import "./App.scss";
 import React from "react";
-import { ToastContainer} from 'react-toastify';
+import { ToastContainer } from "react-toastify";
+import { Provider } from "react-redux";
 
 import Navbar from "./components/navbar/Navbar";
 import Footer from "./components/footer/Footer";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 
 import Home from "./pages/home/Home";
 import Gigs from "./pages/gigs/Gigs";
@@ -16,17 +17,16 @@ import Message from "./pages/message/Message";
 import MyGigs from "./pages/myGigs/MyGigs";
 import Login from "./pages/login/Login";
 import Register from "./pages/register/Register";
-import Pay from "./pages/pay/Pay"
+import Pay from "./pages/pay/Pay";
 import Success from "./pages/success/Success";
 import Update from "./pages/update/Update";
+import { store } from "./store/store";
 
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import {
-  useQuery,
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-
 
 function App() {
   const queryClient = new QueryClient();
@@ -34,11 +34,13 @@ function App() {
   const Layout = () => {
     return (
       <div className="app">
-        <QueryClientProvider client={queryClient}>
-          <Navbar />
-          <Outlet />
-          <Footer />
-        </QueryClientProvider>
+        <Provider store={store}>
+          <QueryClientProvider client={queryClient}>
+            <Navbar />
+            <Outlet />
+            <Footer />
+          </QueryClientProvider>
+        </Provider>
       </div>
     );
   };
@@ -100,18 +102,14 @@ function App() {
           path: "/update/:id",
           element: <Update />,
         },
-       
       ],
     },
   ]);
 
-
-
   return (
     <div>
       <RouterProvider router={router} />
-      <ToastContainer/>
-     
+      <ToastContainer />
     </div>
   );
 }

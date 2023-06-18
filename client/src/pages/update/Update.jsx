@@ -1,21 +1,25 @@
 import './Update.scss'
 import LoadingSpinner from '../../components/loadingSpinner/LoadingSpinner';
 
-import React, { useEffect, useReducer, useState } from "react";
-import { gigReducer, INITIAL_STATE } from "../../reducers/gigReducer";
+import React, {  useState } from "react";
+
 import upload from "../../utils/upload";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import newRequest from "../../utils/newRequest";
 import { useNavigate , useParams} from "react-router-dom";
 import { toast } from "react-toastify";
 import ErrorDisplayer from '../../components/errorDisplayer/ErrorDisplayer';
+import { addFeature, addImages, changeInput } from '../../store/gig/gig.slice';
+import { useDispatch, useSelector } from 'react-redux';
 
 const Update = () => {
     const [singleFile, setSingleFile] = useState(undefined);
     const [files, setFiles] = useState([]);
     const [uploading, setUploading] = useState(false);
   
-    const [state, dispatch] = useReducer(gigReducer, INITIAL_STATE);
+    const dispatch = useDispatch();
+
+    const state = useSelector((state)=>state.gig);
 
     const { id } = useParams();
     console.log(id);
@@ -28,53 +32,43 @@ const Update = () => {
           }),
       });
 
-
+      const handleChange = (e) => {
+        dispatch(changeInput({name : e.target.name , value : e.target.value}));
+      };
+      const handleFeature = (e) => {
+        e.preventDefault();
+        dispatch(addFeature(e.target[0].value));
+        e.target[0].value = "";
+      };
     
-
+      const handleUpload = async () => {
+        setUploading(true);
+        try {
+          const cover = await upload(singleFile);
     
-  
-    const handleChange = (e) => {
-      dispatch({
-        type: "CHANGE_INPUT",
-        payload: { name: e.target.name, value: e.target.value },
-      });
-    };
-    const handleFeature = (e) => {
-      e.preventDefault();
-      dispatch({
-        type: "ADD_FEATURE",
-        payload: e.target[0].value,
-      });
-      e.target[0].value = "";
-    };
-  
-    const handleUpload = async () => {
-      setUploading(true);
-      try {
-        const cover = await upload(singleFile);
-  
-        const images = await Promise.all(
-          [...files].map(async (file) => {
-            const url = await upload(file);
-            return url;
-          })
-        );
-        setUploading(false);
-        toast.success("Successfully uploaded!", {
-          position: "top-center",
-          autoClose: 1000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        dispatch({ type: "ADD_IMAGES", payload: { cover, images } });
-      } catch (err) {
-        console.log(err);
-      }
-    };
+          const images = await Promise.all(
+            [...files].map(async (file) => {
+              const url = await upload(file);
+              return url;
+            })
+          );
+          setUploading(false);
+          toast.success("Successfully uploaded!", {
+            position: "top-center",
+            autoClose: 1000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
+          dispatch(addImages({ cover, images }));
+        } catch (err) {
+          console.log(err);
+        }
+      };
+    
   
     const navigate = useNavigate();
   

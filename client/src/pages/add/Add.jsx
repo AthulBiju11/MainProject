@@ -1,31 +1,30 @@
-import React, { useReducer, useState } from "react";
+import React, {  useState } from "react";
 import "./Add.scss";
-import { gigReducer, INITIAL_STATE } from "../../reducers/gigReducer";
 import upload from "../../utils/upload";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import newRequest from "../../utils/newRequest";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { changeInput, addFeature, addImages, removeFeature } from "../../store/gig/gig.slice";
+import {useDispatch, useSelector} from "react-redux"
 
 const Add = () => {
   const [singleFile, setSingleFile] = useState(undefined);
   const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
 
-  const [state, dispatch] = useReducer(gigReducer, INITIAL_STATE);
+
+  const state = useSelector((state)=>state.gig)
+  console.log(state);
+  
+  const dispatch = useDispatch();
 
   const handleChange = (e) => {
-    dispatch({
-      type: "CHANGE_INPUT",
-      payload: { name: e.target.name, value: e.target.value },
-    });
+    dispatch(changeInput({name : e.target.name , value : e.target.value}));
   };
   const handleFeature = (e) => {
     e.preventDefault();
-    dispatch({
-      type: "ADD_FEATURE",
-      payload: e.target[0].value,
-    });
+    dispatch(addFeature(e.target[0].value));
     e.target[0].value = "";
   };
 
@@ -51,7 +50,7 @@ const Add = () => {
         progress: undefined,
         theme: "light",
       });
-      dispatch({ type: "ADD_IMAGES", payload: { cover, images } });
+      dispatch(addImages({ cover, images }));
     } catch (err) {
       console.log(err);
     }
@@ -164,7 +163,7 @@ const Add = () => {
                 <div className="item" key={f}>
                   <button
                     onClick={() =>
-                      dispatch({ type: "REMOVE_FEATURE", payload: f })
+                      dispatch(removeFeature(f))
                     }
                   >
                     {f}
